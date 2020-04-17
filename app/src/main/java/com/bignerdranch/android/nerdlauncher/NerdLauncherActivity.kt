@@ -8,9 +8,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.w3c.dom.Text
 
 private const val TAG = "NerdLauncherActivity"
 
@@ -45,10 +47,11 @@ class NerdLauncherActivity : AppCompatActivity() {
         recyclerView.adapter = ActivityAdapter(activities)
     }
 
-    private class ActivityHolder(itemView: View) :
-        RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    private inner class ActivityHolder(view: View) :
+        RecyclerView.ViewHolder(view), View.OnClickListener {
 
-        private val nameTextView = itemView as TextView
+        private val nameTextView : TextView = view.findViewById(R.id.app_label)
+        private val iconImageView : ImageView = view.findViewById(R.id.app_icon)
         private lateinit var resolveInfo: ResolveInfo
 
         init {
@@ -61,7 +64,9 @@ class NerdLauncherActivity : AppCompatActivity() {
 
             val packageManager = itemView.context.packageManager
             val appName = resolveInfo.loadLabel(packageManager).toString()
+            val appIcon = resolveInfo.loadIcon(packageManager)
             nameTextView.text = appName
+            iconImageView.setImageDrawable(appIcon)
         }
 
         override fun onClick(view: View) {
@@ -69,7 +74,7 @@ class NerdLauncherActivity : AppCompatActivity() {
             val intent = Intent(Intent.ACTION_MAIN).apply {
                 setClassName(activityInfo.applicationInfo.packageName,
                     activityInfo.name)
-                setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
             val context = view.context
             context.startActivity(intent)
@@ -77,13 +82,13 @@ class NerdLauncherActivity : AppCompatActivity() {
 
     }
 
-    private class ActivityAdapter(val activities: List<ResolveInfo>) :
+    private inner class ActivityAdapter(val activities: List<ResolveInfo>) :
         RecyclerView.Adapter<ActivityHolder>() {
         override fun onCreateViewHolder(container: ViewGroup, viewType: Int):
                 ActivityHolder {
             val layoutInflater = LayoutInflater.from(container.context)
             val view = layoutInflater
-                .inflate(android.R.layout.simple_list_item_1, container, false)
+                .inflate(R.layout.list_item_application, container, false)
             return ActivityHolder(view)
         }
         override fun onBindViewHolder(holder: ActivityHolder, position: Int) {
